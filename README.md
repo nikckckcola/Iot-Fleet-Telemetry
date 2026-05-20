@@ -80,10 +80,21 @@ Odpowiada za analizę danych historycznych (wsadową) w celu wyznaczenia wzorcó
    *Zatrzymanie zbieracza (`Ctrl+C`) po zebraniu odpowiedniej ilości danych (plik `dane_historyczne.json`).*
 
 ### Krok 2: Uruchomienie analiz analitycznych
-Przetwarzanie danych zgromadzonych w pliku wykonuje się poleceniem:
+Przetwarzanie danych można uruchomić na dwa sposoby:
+
+**Sposób A (Przez JupyterLab - zalecany):**
+1. Otwórz `http://localhost:8999` (hasło: `root`).
+2. Przejdź do folderu ze skryptami.
+3. Otwórz Terminal (**File > New > Terminal**) i wpisz:
+   ```bash
+   spark-submit analiza_wsadowa.py
+   ```
+
+**Sposób B (Przez terminal systemowy):**
 ```bash
-docker exec -it iot-fleet-telemetry-spark-1 spark-submit /home/jovyan/work/analiza_wsadowa.py
+docker exec -it iot-fleet-telemetry-spark-1 spark-submit analiza_wsadowa.py
 ```
+*Skrypt automatycznie wykryje plik `dane_historyczne.json` w tym samym folderze dzięki dynamicznemu ustalaniu ścieżek.*
 
 ---
 
