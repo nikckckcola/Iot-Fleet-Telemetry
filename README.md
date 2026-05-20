@@ -1,117 +1,54 @@
-# Symulator danych telemetrycznych pojazdow
+# Inteligentny System Telemetrii i Monitorowania Floty Pojazdów (IoT)
 
-Projekt przedstawia prosty symulator danych w czasie rzeczywistym. Skrypt w Pythonie generuje losowe odczyty telemetryczne dla floty pojazdow ciezarowych i wysyla je do Apache Kafka w formacie JSON.
+Kompleksowy system monitorowania floty w czasie rzeczywistym oraz analizy danych IoT. Projekt ma strukturę modułową, pozwalającą na niezależny rozwój poszczególnych komponentów systemu (symulacja, zbieranie danych, analiza batchowa, analiza strumieniowa).
 
-## Cel projektu
+---
 
-Celem projektu jest zasymulowanie strumienia danych, ktory moglby pochodzic z czujnikow zamontowanych w pojazdach. Takie dane moga byc dalej przetwarzane, analizowane lub wizualizowane w systemach do analizy danych w czasie rzeczywistym.
+## 1. Cel projektu
 
-Przykladowe dane obejmuja:
+Celem projektu jest zasymulowanie i analiza strumienia danych, który mógłby pochodzić z czujników zamontowanych w pojazdach ciężarowych. System pozwala na monitorowanie parametrów technicznych w czasie rzeczywistym, wykrywanie awarii oraz tworzenie historycznych profili zachowań kierowców.
 
-- identyfikator pojazdu,
-- aktualny znacznik czasu,
-- typ zdarzenia,
-- predkosc pojazdu,
-- temperature silnika,
-- poziom paliwa,
-- przykladowa lokalizacje GPS na terenie Polski.
+### Symulowane dane obejmują:
+- Identyfikator pojazdu i aktualny znacznik czasu.
+- Prędkość pojazdu (km/h) i poziom paliwa (%).
+- Temperaturę silnika oraz lokalizację GPS na terenie Polski.
 
-Symulator generuje rowniez zdarzenia specjalne:
+### Zdarzenia specjalne:
+- **`late_signal`** - symulacja utraty zasięgu (np. w tunelu) – dane przesyłane z opóźnieniem.
+- **`engine_overheat`** - nagły skok temperatury silnika oznaczający usterkę techniczną.
 
-- `late_signal` - spozniony sygnal, np. po utracie zasiegu w tunelu,
-- `engine_overheat` - nagly skok temperatury silnika oznaczajacy usterke.
+---
 
-## Technologie
+## 2. Architektura i wspólna infrastruktura
 
-- Python
-- Apache Kafka
-- ZooKeeper
-- Docker Compose
-- biblioteka `kafka-python`
+### Wykorzystane technologie:
+- **Broker wiadomości**: Apache Kafka & ZooKeeper
+- **Silnik analityczny**: Apache Spark (PySpark)
+- **Konteneryzacja**: Docker & Docker Compose
+- **Język programowania**: Python 3.x
 
-## Struktura projektu
-
-```text
-.
-├── docker-compose.yml   # konfiguracja Kafki i ZooKeepera
-├── symulator.py         # generator danych telemetrycznych
-└── README.md            # opis projektu
-```
-
-## Wymagania
-
-Przed uruchomieniem projektu nalezy miec zainstalowane:
-
-- Docker,
-- Docker Compose,
-- Python 3,
-- biblioteke `kafka-python`.
-
-Biblioteke Pythona mozna zainstalowac poleceniem:
-
-```bash
-pip install kafka-python
-```
-
-## Uruchomienie
-
-1. Uruchom Kafke i ZooKeepera:
-
+### Uruchomienie środowiska:
+Wszystkie moduły korzystają ze wspólnej infrastruktury zdefiniowanej w `docker-compose.yml`.
 ```bash
 docker compose up -d
 ```
+*Dostęp do środowiska JupyterLab: `http://localhost:8999` (hasło: `root`).*
 
-Podczas startu tworzona jest rowniez para topicow Kafka:
+---
 
-```text
-vehicle_telemetry
-fleet_alerts
-```
+## 3. Moduł: Symulacja sensorów IoT
 
-2. Uruchom symulator:
+Odpowiada za generowanie realistycznego strumienia danych z pojazdów i wysyłanie ich do systemu.
 
-```bash
-python symulator.py
-```
-
-Po uruchomieniu skrypt bedzie co sekunde wysylal nowa wiadomosc do topicu Kafka:
-
-```text
-vehicle_telemetry
-```
-
-Jesli zostanie wykryty spozniony sygnal lub awaria, dodatkowa wiadomosc zostanie wyslana do topicu:
-
-```text
-fleet_alerts
-```
-
-W terminalu powinny pojawiac sie komunikaty podobne do:
-
-```text
-Wyslano: {'id_pojazdu': 'VOLVO_001', 'timestamp': '2026-05-18T21:39:00', 'predkosc_kmh': 82, 'temperatura_silnika': 94, 'poziom_paliwa_procent': 67, 'GPS_lat': 52.1234, 'GPS_lon': 19.5678}
-```
-
-3. Aby zatrzymac symulator, wcisnij:
-
-```text
-CTRL+C
-```
-
-4. Aby zatrzymac kontenery Dockera:
-
-```bash
-docker compose down
-```
-
-## Format wysylanej wiadomosci
-
-Kazda wiadomosc telemetryczna wysylana do `vehicle_telemetry` ma format JSON:
-
+- **Skrypt**: `symulator.py`
+- **Główne zadania**: 
+    - Generowanie losowych odczytów telemetrycznych w formacie JSON.
+    - Wysyłanie danych do tematów `vehicle_telemetry` (dane bieżące) oraz `fleet_alerts` (powiadomienia o usterkach).
+- **Format wiadomości**:
 ```json
 {
   "id_pojazdu": "VOLVO_001",
-  "timestamp": "2026-05-18T21:39:00.000000",
+  "timestamp": "2026-05-18T21:39:00",
   "event_type": "normal",
   "predkosc_kmh": 82,
   "temperatura_silnika": 94,
@@ -121,28 +58,48 @@ Kazda wiadomosc telemetryczna wysylana do `vehicle_telemetry` ma format JSON:
 }
 ```
 
-Przykladowa wiadomosc alertowa wysylana do `fleet_alerts`:
+---
 
-```json
-{
-  "id_pojazdu": "VOLVO_001",
-  "timestamp": "2026-05-18T21:39:00.000000",
-  "event_type": "engine_overheat",
-  "alert_level": "HIGH",
-  "message": "Awaria - nagly skok temperatury silnika",
-  "source_topic": "vehicle_telemetry",
-  "temperatura_silnika": 128
-}
+## 4. Moduł: Raportowanie i profilowanie floty
+
+Odpowiada za analizę danych historycznych (wsadową) w celu wyznaczenia wzorców zachowań i raportowania anomalii.
+
+- **Skrypty**: `zbieracz_danych.py` (pozyskiwanie danych), `analiza_wsadowa.py` (analiza Spark).
+- **Zrealizowane raporty**:
+    - **Data Lake**: Składowanie danych strumieniowych w formacie JSON Lines na potrzeby audytu.
+    - **Analiza prędkości**: Identyfikacja pojazdów najczęściej przekraczających dozwolone normy.
+    - **Profilowanie bazowe**: Wykorzystanie funkcji okien czasowych (Window Functions) do wyliczenia średniej prędkości w trasach (np. w oknach 15-minutowych), co pozwala określić "normę" dla danego kierowcy.
+
+---
+
+## 5. Instrukcja obsługi systemu
+
+### Krok 1: Pozyskiwanie danych (Przygotowanie wsadu)
+1. Uruchomienie symulatora w terminalu: `python symulator.py`
+2. Uruchomienie zbieracza danych w nowym terminalu: `python zbieracz_danych.py`
+   *Zatrzymanie zbieracza (`Ctrl+C`) po zebraniu odpowiedniej ilości danych (plik `dane_historyczne.json`).*
+
+### Krok 2: Uruchomienie analiz analitycznych
+Przetwarzanie danych zgromadzonych w pliku wykonuje się poleceniem:
+```bash
+docker exec -it iot-fleet-telemetry-spark-1 spark-submit /home/jovyan/work/analiza_wsadowa.py
 ```
 
-## Opis dzialania
+---
 
-Skrypt `symulator.py` tworzy producenta Kafka, ktory laczy sie z brokerem pod adresem `localhost:29092`. Nastepnie w petli nieskonczonej losuje pojazd z listy, generuje przykladowe wartosci czujnikow i wysyla je do topicu `vehicle_telemetry`.
+## Struktura plików projektu
 
-W kazdej iteracji istnieje niewielka szansa na wygenerowanie zdarzenia specjalnego. Dla spoznionego sygnalu czas zdarzenia jest cofany o 2 minuty, co pozwala testowac przetwarzanie opoznionych danych. Dla awarii silnika temperatura jest podnoszona do zakresu `115-140`, co symuluje usterke. Takie zdarzenia trafiaja takze do topicu `fleet_alerts`.
+```text
+.
+├── docker-compose.yml     # Wspólna konfiguracja kontenerów
+├── symulator.py           # [Moduł 1] Generator danych
+├── zbieracz_danych.py     # [Moduł 2] Pozyskiwanie danych do JSON
+├── analiza_wsadowa.py     # [Moduł 2] Analiza Spark Batch
+├── dane_historyczne.json  # [Dane] Plik wynikowy pozyskiwania danych
+└── README.md              # Główna dokumentacja
+```
 
-Program dziala do momentu recznego zatrzymania przez uzytkownika.
+---
 
-## Uwaga
-
-Jesli symulator nie moze polaczyc sie z Kafka, sprawdz konfiguracje portow w `docker-compose.yml` oraz adres `bootstrap_servers` w pliku `symulator.py`. Obecnie skrypt probuje laczyc sie z Kafka przez `localhost:29092`.
+## Uwagi do dalszego tworzenia projektu
+System jest przygotowany na dodanie kolejnych modułów (np. część 3 - analiza strumieniowa, część 4: wizualizacja danych). Każdy nowy moduł powinien korzystać z istniejącego brokera wiadomości i być udokumentowany w analogiczny sposób.

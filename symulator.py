@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from kafka import KafkaProducer
 
 producer = KafkaProducer(
-    bootstrap_servers=['localhost:29092'],
+    bootstrap_servers=['localhost:29092', 'broker:9092'],
     api_version=(0, 11, 5), 
     value_serializer=lambda v: json.dumps(v).encode('utf-8')
 )
@@ -45,7 +45,7 @@ try:
             temperatura = random.randint(115, 140)
             event_type = "engine_overheat"
             opis_alertu = "Awaria - nagly skok temperatury silnika"
-            print("⚠️ AWARIA: Wykryto przegrzanie silnika!")
+            print("AWARIA: Wykryto przegrzanie silnika!")
         # -----------------------------------------------
         
         dane_z_czujnikow = {
