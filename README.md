@@ -72,6 +72,21 @@ Odpowiada za analizę danych historycznych (wsadową) w celu wyznaczenia wzorcó
 
 ---
 
+### 6. Moduł 4: Detekcja Zdarzeń w Czasie Rzeczywistym (Stream Processing)
+
+Moduł ten odpowiada za ciągłe analizowanie strumienia danych telemetrycznych na żywo przy użyciu **PySpark Structured Streaming**. Jego głównym celem jest wykrywanie niebezpiecznych wzorców w zachowaniu floty (np. przegrzewanie silnika) i wysyłanie alertów do systemu.
+
+**Pliki realizujące ten etap:**
+* `detekcja_zdarzen.py` – główny silnik analityczny Spark.
+* `sprawdz_alerty.py` – skrypt konsumenta pełniący rolę podglądu dla dyspozytora.
+
+**Główne mechanizmy wdrożone w module:**
+1. **Sliding Windows (Okna Przesuwne):** Dane są grupowane w oknach 30-sekundowych, które przesuwają się co 10 sekund. W każdym oknie obliczana jest m.in. średnia prędkość oraz maksymalna temperatura silnika dla danego pojazdu.
+2. **Watermarking (Obsługa Opóźnień):** Skrypt uwzględnia "problem tunelu" – zezwala na 2-minutowe opóźnienie w napływie pakietów (np. gdy pojazd odzyska zasięg i wyśle zaległe logi). Spóźnione dane są poprawnie dopisywane do odpowiednich historycznych okien czasowych.
+3. **Detekcja Anomalii:** Jeśli w danym oknie czasowym średnia prędkość przekroczy 130 km/h LUB maksymalna temperatura przekroczy 110 stopni, generowany jest `CRITICAL_ALERT`.
+
+---
+
 ## 5. Instrukcja obsługi systemu
 
 ### Krok 1: Pozyskiwanie danych (Przygotowanie wsadu)
