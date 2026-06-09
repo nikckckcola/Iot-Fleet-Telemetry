@@ -87,7 +87,7 @@ Moduł odpowiada za odbiór, czyszczenie i agregację surowego strumienia danych
 4. **Watermarking (Obsługa Opóźnień):** Moduł uwzględnia scenariusz utraty zasięgu — zezwala na 2-minutowe opóźnienie w napływie pakietów (zdarzenie late_signal generowane przez symulator przy wjeździe do tunelu). Spóźnione dane są poprawnie przypisywane do odpowiednich historycznych okien czasowych na podstawie event time, a nie czasu przetwarzania.
 
 ---
-### 6. Moduł 4: Detekcja Zdarzeń w Czasie Rzeczywistym (Stream Processing)
+### 6. Moduł: Detekcja Zdarzeń w Czasie Rzeczywistym (Stream Processing)
 
 Moduł ten odpowiada za ciągłe analizowanie strumienia danych telemetrycznych na żywo przy użyciu **PySpark Structured Streaming**. Jego głównym celem jest wykrywanie niebezpiecznych wzorców w zachowaniu floty (np. przegrzewanie silnika) i wysyłanie alertów do systemu.
 
@@ -102,55 +102,16 @@ Moduł ten odpowiada za ciągłe analizowanie strumienia danych telemetrycznych 
 
 ---
 
-### Moduł 5: Serwer Flask + API
+### 7. Moduł: Serwer Flask + API
 
-Ostatni z modułów odpowiada za stworzenie serwera opartego o technologię Flask, oraz interfejsu API pozwalającego na:
-1) Za pomocą metod typu POST - uploadowanie symulowanych danych i alertów na serwer
-2) GET - uzyskanie dostępu do interesujących nas danych
+Moduł ten odpowiada za stworzenie serwera opartego o technologię Flask, oraz interfejsu API pozwalającego na:
+1) uploadowanie symulowanych danych i alertów na serwer - za pomocą metod typu POST
+2) uzyskanie dostępu do interesujących nas danych - z użyciem GET
 
 Plik integracja_fleet-api.py automatyzuje pobieranie pojawiających się na kafkowych wątkach danych, oraz postowanie ich na naszym serwerze, właśnie za pomocą metod API.
 
 ---
 
-## 5. Instrukcja obsługi systemu
+### 8. Dashboard
 
-### Krok 1: Pozyskiwanie danych (Przygotowanie wsadu)
-1. Uruchomienie symulatora w terminalu: `python symulator.py`
-2. Uruchomienie zbieracza danych w nowym terminalu: `python zbieracz_danych.py`
-   *Zatrzymanie zbieracza (`Ctrl+C`) po zebraniu odpowiedniej ilości danych (plik `dane_historyczne.json`).*
-
-### Krok 2: Uruchomienie analiz analitycznych
-Przetwarzanie danych można uruchomić na dwa sposoby:
-
-**Sposób A (Przez JupyterLab - zalecany):**
-1. Otwórz `http://localhost:8999` (hasło: `root`).
-2. Przejdź do folderu ze skryptami.
-3. Otwórz Terminal (**File > New > Terminal**) i wpisz:
-   ```bash
-   spark-submit analiza_wsadowa.py
-   ```
-
-**Sposób B (Przez terminal systemowy):**
-```bash
-docker exec -it iot-fleet-telemetry-spark-1 spark-submit analiza_wsadowa.py
-```
-*Skrypt automatycznie wykryje plik `dane_historyczne.json` w tym samym folderze dzięki dynamicznemu ustalaniu ścieżek.*
-
----
-
-## Struktura plików projektu
-
-```text
-.
-├── docker-compose.yml     # Wspólna konfiguracja kontenerów
-├── symulator.py           # [Moduł 1] Generator danych
-├── zbieracz_danych.py     # [Moduł 2] Pozyskiwanie danych do JSON
-├── analiza_wsadowa.py     # [Moduł 2] Analiza Spark Batch
-├── dane_historyczne.json  # [Dane] Plik wynikowy pozyskiwania danych
-└── README.md              # Główna dokumentacja
-```
-
----
-
-## Uwagi do dalszego tworzenia projektu
-System jest przygotowany na dodanie kolejnych modułów (np. część 3 - analiza strumieniowa, część 4: wizualizacja danych). Każdy nowy moduł powinien korzystać z istniejącego brokera wiadomości i być udokumentowany w analogiczny sposób.
+Dashboard przekształca surowe dane w czytelne wnioski biznesowe. Zamiast tabel z danymi, możemy spojrzeć na czytelne wykresy, które pozwalają na natychmiastową ocenę sytuacji.
