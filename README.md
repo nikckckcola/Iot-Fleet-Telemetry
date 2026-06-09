@@ -71,7 +71,20 @@ Odpowiada za analizę danych historycznych (wsadową) w celu wyznaczenia wzorcó
     - **Profilowanie bazowe**: Wykorzystanie funkcji okien czasowych (Window Functions) do wyliczenia średniej prędkości w trasach (np. w oknach 15-minutowych), co pozwala określić "normę" dla danego kierowcy.
 
 ---
+## 5. Moduł: Ciągłe Przetwarzanie Sygnału
 
+Moduł odpowiada za odbiór, czyszczenie i agregację surowego strumienia danych telemetrycznych w czasie rzeczywistym przy użyciu PySpark Structured Streaming.
+**Plik realizujący ten etap:**
+streaming_app.py – główna aplikacja strumieniowa.
+
+**Główne mechanizmy wdrożone w module:**
+
+1. **Odczyt strumienia z Kafki:** Aplikacja podłącza się do tematu vehicle_telemetry i odbiera dane w trybie ciągłym. Surowe bajty są dekodowane i parsowane do struktury DataFrame zgodnie z predefiniowanym schematem, identycznym z formatem wiadomości generowanych przez symulator.
+2. **Czyszczenie danych w locie:** Przed agregacją każdy rekord jest walidowany. Odrzucane są rekordy z ujemną prędkością (błąd sensora), współrzędnymi GPS poza dopuszczalnym zakresem (symulator generuje wartość 999.0 jako symulację awarii GPS), brakującym identyfikatorem pojazdu lub znacznikiem czasu, oraz temperaturą silnika poza fizycznym zakresem 0–200°C.
+3. **Sliding Windows (Okna Przesuwne):** Oczyszczone dane są grupowane per pojazd w wędrujących oknach czasowych 30-sekundowych przesuwanych co 10 sekund. W każdym oknie obliczana jest średnia prędkość, maksymalna temperatura silnika oraz średni poziom paliwa. Zastosowanie max zamiast avg dla temperatury pozwala wykryć nawet chwilowe skoki wartości w obrębie okna.
+4. **Watermarking (Obsługa Opóźnień):** Moduł uwzględnia scenariusz utraty zasięgu — zezwala na 2-minutowe opóźnienie w napływie pakietów (zdarzenie late_signal generowane przez symulator przy wjeździe do tunelu). Spóźnione dane są poprawnie przypisywane do odpowiednich historycznych okien czasowych na podstawie event time, a nie czasu przetwarzania.
+
+---
 ### 6. Moduł 4: Detekcja Zdarzeń w Czasie Rzeczywistym (Stream Processing)
 
 Moduł ten odpowiada za ciągłe analizowanie strumienia danych telemetrycznych na żywo przy użyciu **PySpark Structured Streaming**. Jego głównym celem jest wykrywanie niebezpiecznych wzorców w zachowaniu floty (np. przegrzewanie silnika) i wysyłanie alertów do systemu.
