@@ -77,7 +77,7 @@ Moduł odpowiada za odbiór, czyszczenie i agregację surowego strumienia danych
 
 **Plik realizujący ten etap:**
 
-'streaming_app.py' – główna aplikacja strumieniowa.
+`streaming_app.py` – główna aplikacja strumieniowa.
 
 **Główne mechanizmy wdrożone w module:**
 
