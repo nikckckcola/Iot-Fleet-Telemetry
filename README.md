@@ -115,3 +115,10 @@ Plik integracja_fleet-api.py automatyzuje pobieranie pojawiających się na kafk
 ### 8. Dashboard
 
 Dashboard przekształca surowe dane w czytelne wnioski biznesowe. Zamiast tabel z danymi, możemy spojrzeć na czytelne wykresy, które pozwalają na natychmiastową ocenę sytuacji.
+
+### Autorzy
+- Nicola Kulesza
+- Alicja Żebiałowicz
+- Kacper Hajduk
+- Krzysztof Kosz
+- Michał Stasik
