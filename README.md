@@ -87,7 +87,7 @@ Moduł ten odpowiada za ciągłe analizowanie strumienia danych telemetrycznych 
 
 ---
 
-### Moduł 5: Serwert API
+### Moduł 5: Serwer API
 
 Ostatni z modułów odpowiada za stworzenie serwera opartego o technologię Flask, oraz interfejsu API pozwalającego:
 1) Za pomocą metod typu POST - uploadowanie symulowanych danych i alertów na serwer
