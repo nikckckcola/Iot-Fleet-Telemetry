@@ -74,8 +74,10 @@ Odpowiada za analizę danych historycznych (wsadową) w celu wyznaczenia wzorcó
 ## 5. Moduł: Ciągłe Przetwarzanie Sygnału
 
 Moduł odpowiada za odbiór, czyszczenie i agregację surowego strumienia danych telemetrycznych w czasie rzeczywistym przy użyciu PySpark Structured Streaming.
+
 **Plik realizujący ten etap:**
-streaming_app.py – główna aplikacja strumieniowa.
+
+'streaming_app.py' – główna aplikacja strumieniowa.
 
 **Główne mechanizmy wdrożone w module:**
 
