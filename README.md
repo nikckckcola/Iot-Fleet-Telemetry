@@ -87,7 +87,7 @@ Moduł odpowiada za odbiór, czyszczenie i agregację surowego strumienia danych
 4. **Watermarking (Obsługa Opóźnień):** Moduł uwzględnia scenariusz utraty zasięgu — zezwala na 2-minutowe opóźnienie w napływie pakietów (zdarzenie late_signal generowane przez symulator przy wjeździe do tunelu). Spóźnione dane są poprawnie przypisywane do odpowiednich historycznych okien czasowych na podstawie event time, a nie czasu przetwarzania.
 
 ---
-### 6. Moduł: Detekcja Zdarzeń w Czasie Rzeczywistym (Stream Processing)
+## 6. Moduł: Detekcja Zdarzeń w Czasie Rzeczywistym (Stream Processing)
 
 Moduł ten odpowiada za ciągłe analizowanie strumienia danych telemetrycznych na żywo przy użyciu **PySpark Structured Streaming**. Jego głównym celem jest wykrywanie niebezpiecznych wzorców w zachowaniu floty (np. przegrzewanie silnika) i wysyłanie alertów do systemu.
 
@@ -102,7 +102,7 @@ Moduł ten odpowiada za ciągłe analizowanie strumienia danych telemetrycznych 
 
 ---
 
-### 7. Moduł: Serwer Flask + API
+## 7. Moduł: Serwer Flask + API
 
 Moduł ten odpowiada za stworzenie serwera opartego o technologię Flask, oraz interfejsu API pozwalającego na:
 1) uploadowanie symulowanych danych i alertów na serwer - za pomocą metod typu POST
@@ -112,9 +112,13 @@ Plik integracja_fleet-api.py automatyzuje pobieranie pojawiających się na kafk
 
 ---
 
-### 8. Dashboard
+## 8. Dashboard
 
 Dashboard przekształca surowe dane w czytelne wnioski biznesowe. Zamiast tabel z danymi, możemy spojrzeć na czytelne wykresy, które pozwalają na natychmiastową ocenę sytuacji.
+
+![](images_readme/dashboard_1.png)
+
+![](images_readme/dashboard_2.png)
 
 ### Autorzy
 - Nicola Kulesza
